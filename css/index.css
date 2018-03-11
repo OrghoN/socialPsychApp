@@ -1,0 +1,33 @@
+body {
+/*   background: #0d0a43;  */
+  background: #990000;
+  color: #FFFFFF;;
+}
+
+#timer{
+  border-bottom: solid;
+}
+
+.x-4{
+  font-size: 4em;
+}
+
+.navbar-fixed-bottom{
+  border-top:solid;
+}
+
+.count{
+  border-right:solid;
+}
+
+.x-15{
+  font-size:15em;
+}
+
+.verticalCenter{
+  position: absolute;
+  top: 50%;
+  left:50%;
+  transform: translate(-50%,-50%);
+
+}
