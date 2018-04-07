@@ -17,43 +17,72 @@
  * under the License.
  */
 var app = {
-    // Application Constructor
-    initialize: function() {
-        document.addEventListener('deviceready', this.onDeviceReady.bind(this), false);
-    },
+  // Application Constructor
+  initialize: function() {
+    document.addEventListener('deviceready', this.onDeviceReady.bind(this), false);
+  },
 
-    // deviceready Event Handler
-    //
-    // Bind any cordova events here. Common events are:
-    // 'pause', 'resume', etc.
-    onDeviceReady: function() {
-        this.receivedEvent('deviceready');
-    },
+  // deviceready Event Handler
+  //
+  // Bind any cordova events here. Common events are:
+  // 'pause', 'resume', etc.
+  onDeviceReady: function() {
+    this.receivedEvent('deviceready');
+  },
 
-    // Update DOM on a Received Event
-    receivedEvent: function(id) {
-        var parentElement = document.getElementById(id);
-        var listeningElement = parentElement.querySelector('.listening');
-        var receivedElement = parentElement.querySelector('.received');
+  // Update DOM on a Received Event
+  receivedEvent: function(id) {
+    var parentElement = document.getElementById(id);
+    var listeningElement = parentElement.querySelector('.listening');
+    var receivedElement = parentElement.querySelector('.received');
 
-        listeningElement.setAttribute('style', 'display:none;');
-        receivedElement.setAttribute('style', 'display:block;');
+    listeningElement.setAttribute('style', 'display:none;');
+    receivedElement.setAttribute('style', 'display:block;');
 
-        console.log('Received Event: ' + id);
-    }
+    console.log('Received Event: ' + id);
+  }
 };
 
 app.initialize();
 
+//Tap and long tap detection initialization
+var detectionRange = window.self;
+var mc = new Hammer(detectionRange);
+mc.add(new Hammer.Tap());
+mc.add(new Hammer.Press({
+  event: 'press',
+  pointer: 1,
+  threshold: 9,
+  time: 500,
+}));
 
-window.onclick = function() {
+// listen to events...
+mc.on("tap pressup press", function(ev) {
+  console.log(ev.type);
+});
+
+mc.on("tap", function(ev){
   tap();
-}
+})
 
+mc.on("press", function(ev){
+  init();
+})
+
+//Helper Functions
 function toMinute(time) {
   var minute = Math.floor(time / 60);
   var seconds = Math.floor(time % 60);
   return minute + " : " + seconds;
+}
+
+function vibrate(value) {
+  // enable vibration support
+  navigator.vibrate = navigator.vibrate || navigator.webkitVibrate || navigator.mozVibrate || navigator.msVibrate;
+
+  if (navigator.vibrate) {
+    navigator.vibrate(value);
+  }
 }
 
 function init() {
@@ -61,43 +90,31 @@ function init() {
     time = 0;
     currentTally = 0;
     timerOn = false;
-    $("body").css("background", "#990000");
+    tapInnefective = false;
+    $("body").css("background", "#f44141");
+
+    $("#time").html(toMinute(0));
+
+    $("#tally0").html(0);
+    $("#tally1").html(0);
+    $("#tally2").html(0);
+
+    $("#currentTally").html(0);
   });
-}
-
-function reset() {
-  $("#time").html(toMinute(0));
-
-  $("#tally0").html(0);
-  $("#tally1").html(0);
-  $("#tally2").html(0);
-
-  $("#currentTally").html(0);
 }
 
 function tap() {
   if (!timerOn) {
-    $("body").css("background", "#0d0a43");
+    $("body").css("background", "#4268f4");
     timerOn = true;
-    reset();
     set = setInterval(startCount, 1000);
-  } else {
+  } else if (!tapInnefective) {
     currentTally++;
     $("#currentTally").html(currentTally);
-
   }
 }
 
 init();
-
-function vibrate(value){
-	// enable vibration support
-			navigator.vibrate = navigator.vibrate || navigator.webkitVibrate || navigator.mozVibrate || navigator.msVibrate;
-
-			if (navigator.vibrate) {
-			navigator.vibrate(value);
-			}
-}
 
 function startCount() {
   if (timerOn) {
@@ -108,21 +125,25 @@ function startCount() {
       $("#time").html(toMinute(time));
 
       if (time == 60) {
+      // if (time == 10) {
         vibrate(1000);
         $("#tally0").html(currentTally);
         currentTally = 0;
         $("#currentTally").html(currentTally);
       } else if (time == 120) {
+      // } else if (time == 20) {
         vibrate(1000);
         $("#tally1").html(currentTally);
         currentTally = 0;
         $("#currentTally").html(currentTally);
       } else if (time == 180) {
+      // } else if (time == 30) {
         vibrate(1000);
         $("#tally2").html(currentTally);
         currentTally = 0;
         $("#currentTally").html(currentTally);
-        init();
+        tapInnefective = true;
+        $("body").css("background", "#42f465");
         window.clearInterval(set);
       }
     });
